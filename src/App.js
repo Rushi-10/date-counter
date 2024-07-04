@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useReducer, useState } from "react";
 import "./index.css";
+
 
 export default function App() {
   return (
@@ -8,29 +9,47 @@ export default function App() {
     </div>
   );
 }
+const initialState={count:0,step:1};
+function reducer(state,action){
+  switch(action.type){
+    case "dec":
+       return {...state,count:state.count-state.step};
+    case "inc":
+       return {...state,count:state.count+state.step};
+    case "reset":
+       return initialState;
+    case "setCount":
+       return {...state,count:action.payload};
+    case "setStep":
+       return {...state,step:action.payload};
+  default:
+    throw new Error("unknown action");
+  }
+}
 
 function Counter() {
-  const [count, setCount] = useState(0);
-  const [step, setStep] = useState(1);
+  const [state, dispatch] =useReducer(reducer,initialState); 
+ const{count,step}=state;
 
   const date = new Date();
   date.setDate(date.getDate() + count);
 function handleReset(){
-  setCount(0);
-  setStep(1);
+  dispatch({type:"reset"});
+  
 }
+
   return (
     <div>
       <div>
-        <input type="range" value={step} onChange={(e)=>setStep(Number(e.target.value))}/>
+        <input type="range" value={step} onChange={(e)=>dispatch({type:"setStep",payload:Number(e.target.value)})}/>
         <span>Step: {step}</span>
         
       </div>
 
       <div>
-        <button onClick={() => setCount((c) => c - step)}>-</button>
+        <button onClick={()=>dispatch({type:"dec"})}>-</button>
         <span>Count: {count}</span>
-        <button onClick={() => setCount((c) => c + step)}>+</button>
+        <button onClick={()=>dispatch({type:"inc"})}>+</button>
       </div>
 
       <p>
@@ -44,7 +63,7 @@ function handleReset(){
         <span>{date.toDateString()}</span>
       </p>
       {count!==0 || step!==0?(<div>
-        <button onClick={handleReset}>Reset</button>
+        <button onClick={()=>handleReset()}>Reset</button>
        </div>):null}
        </div>
     
